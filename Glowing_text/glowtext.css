@@ -1,0 +1,96 @@
+:root{
+    --frame-size: 210px;
+    --background-color: rgb(48 48 58);
+    --text-color-hex: #fff;
+    --text-shadow: #00aad4;
+}
+body{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.glow_text{
+    height: var(--frame-size);
+    width: calc(var(--frame-size) * 4);
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.frame-obj{
+    z-index: 0;
+    position: absolute;
+    color: var(--text-color-hex);
+    font-size: 100px;
+    /* text-shadow: 0px 0px 25px var(--text-shadow); */
+    /* animation: blink_text 5s infinite; */
+}
+/* h1::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #00aad4;
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(50px);
+    animation: blinkH1Before 5s  infinite;
+} */
+/* @keyframes blink_text {
+    0%   {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+    19%   {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+    20% {
+        color: #9E9E9E;
+        text-shadow: none;
+    }
+    21% {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+    60% {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+    61% {
+        color: #9E9E9E;
+        text-shadow: none;
+    }
+    62% {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+    63% {
+        color: #9E9E9E;
+        text-shadow: none;
+    }
+    64% {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+    100% {
+        color: #fff;
+        text-shadow: 0px 0px 20px #00aad4;
+    }
+} */
+/* @-webkit-keyframes blinkH1Before {
+    0% {background: #00aad4;}
+    19% {background: #00aad4;}
+    20% {background: transparent;}
+    21% {background: #00aad4;}
+    60% {background: #00aad4;}
+    61% {background: transparent;}
+    62% {background: #00aad4;}
+    63% {background: transparent;}
+    64% {background: #00aad4;}
+    100% {background: #00aad4;}
+} */
+  

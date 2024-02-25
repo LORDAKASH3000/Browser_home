@@ -1,0 +1,103 @@
+:root{
+    --Bbutton-size: 50px;
+    /* --Bbackground-color: rgb(48 48 58); */
+    --Bbackground-color: rgb(232 232 232 / 72%);
+    /* --Bbackground-color: #e8e8e8c2; */
+    --Bbackground-size: 100px;
+}
+body{
+    background: url("https://preview.redd.it/aveyn348soa81.jpg?auto=webp&s=d55804c5e121f009e9b08b4c187bc0b1c03b8721");
+    background-attachment:fixed;
+    height: 98vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+.Gemes{
+    backdrop-filter: blur(50px);
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* flex-direction: column; */
+    flex-direction: row;
+    background-color: var(--Bbackground-color);
+    /* width: var(--background-size); */
+}
+.social-button{
+    position: relative;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height:var(--Bbutton-size);
+    width: var(--Bbutton-size);
+    background-color: #ffffff;
+    border-radius: 100%;
+    margin: 10px 10px;
+}
+.social-button::after{
+    content: '';
+    position: absolute;
+    top: -1px;
+    width: 0;
+    height: 0;
+    transition: .3s;
+    border-radius: 100%;
+}
+.instagram{
+    color: #ff00ae;
+}
+.instagram::after{
+    background-image: linear-gradient(to top,#ffc743,#dc3d3d,#a9007b);
+}
+.facebook{
+    color: #2969ff;
+}
+.facebook::after{
+    background-image: linear-gradient(to top,#0132f8,#94b4fd);
+}
+.chatgpt::after{
+    background-color: #0C9459;
+}
+.bard{
+    fill: #f034cd;
+}
+.bard::after{
+    background-image: linear-gradient(to bottom,#ffc743,#f034cd,#a100a9,#346ae9);
+}
+.github::after{
+    background-color: #561b89;
+}
+.oracle::after{
+    background-color: #ff0303;
+}
+.social-button:focus::after, .social-button:hover::after{
+    height:calc(var(--Bbutton-size) + 2px);
+    width: calc(var(--Bbutton-size) + 2px);
+}
+.social-button:focus, .social-button:hover,.social-button:hover .secondg,.social-button:focus .secondg,.bard:hover,.social-button:hover .oracle_logo::before,.social-button:focus .oracle_logo::before{
+    color: #fff;
+    fill: #fff;
+    border-color: #fff;
+}
+.social-button i{
+    z-index: 1;
+    transition: 0.3s;
+}
+.social-button>svg{
+    z-index: 1;
+    transition: 0.3s;
+    border-radius: 100%;
+}
+i::before{
+    font-size: 2.5em;
+}
+.oracle_logo::before{
+    content: '';
+    display: block;
+    border-radius: 40%;
+    width: 26px;
+    height: 17px;
+    border: 5px solid #ff0303;
+}
