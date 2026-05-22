@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Signatures – Chakra Sayan Roy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #080810;
+  min-height: 100vh;
+  padding: 40px 20px 60px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ─── TABS ─── */
+.tabs-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 10px 22px;
+  border-radius: 40px;
+  border: 1px solid #222238;
+  background: #10101e;
+  color: #444466;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+.tab-btn.active {
+  background: #1e1240;
+  border-color: #633cff;
+  color: #c4bfff;
+  box-shadow: 0 0 20px rgba(99,60,255,0.25);
+}
+.tab-btn:hover:not(.active) { border-color: #333355; color: #7777aa; }
+
+/* ─── PAGE TITLE ─── */
+.page-title {
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #333355;
+  margin-bottom: 40px;
+}
+
+/* ─── SECTION ─── */
+.sig-section { display: none; flex-direction: column; align-items: center; }
+.sig-section.active { display: flex; }
+
+.sig-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #333355;
+  margin-bottom: 16px;
+}
+
+/* ─── COPY BTN ─── */
+.copy-wrap { margin-top: 20px; text-align: center; }
+.copy-btn {
+  background: transparent;
+  border: 1px solid #633cff55;
+  color: #8b7fff;
+  padding: 9px 26px;
+  border-radius: 6px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+}
+.copy-btn:hover { background: #633cff22; border-color: #633cff; color: #c4bfff; }
+.copy-hint { margin-top: 8px; font-size: 10px; color: #333355; letter-spacing: 1px; }
+
+
+/* ══════════════════════════════════════════
+   TEMPLATE 1 — NEON SPLIT
+   Left: photo + social strip | Right: details
+   Aesthetic: cyberpunk editorial
+══════════════════════════════════════════ */
+#sig1 {
+  width: 680px;
+  background: #0c0c14;
+  border: 1px solid #1a1a2e;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  font-family: 'Outfit', sans-serif;
+}
+
+.s1-left {
+  width: 160px;
+  min-width: 160px;
+  background: linear-gradient(180deg, #0d0820 0%, #110e2a 60%, #0a1428 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0 20px;
+  position: relative;
+  border-right: 1px solid #1f1f3a;
+}
+
+.s1-left::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff2d78, #633cff, #00e5ff);
+}
+
+.s1-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: linear-gradient(#0c0c14, #0c0c14) padding-box,
+              linear-gradient(135deg, #ff2d78, #633cff, #00e5ff) border-box;
+  box-shadow: 0 0 24px rgba(99,60,255,0.4);
+  flex-shrink: 0;
+}
+.s1-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.s1-name-short {
+  margin-top: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: #e8e0ff;
+  letter-spacing: 0.5px;
+  text-align: center;
+  padding: 0 10px;
+  line-height: 1.2;
+}
+
+.s1-role-tag {
+  margin-top: 6px;
+  background: rgba(99,60,255,0.15);
+  border: 1px solid rgba(99,60,255,0.3);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #9980ff;
+}
+
+.s1-divider {
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2a2a4a, transparent);
+  margin: 14px 0;
+}
+
+.s1-socials {
+  display: flex;
+  gap: 7px;
+  width: 100%;
+  padding: 0 14px;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.s1-social-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.s1-social-link:hover { background: rgba(99,60,255,0.12); }
+.s1-social-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.s1-social-icon svg { width: 14px; height: 14px; }
+
+.social-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #5555aa;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #1e1e30;
+  border: 1px solid #2e2e48;
+  transition: all 0.2s;
+  text-decoration: none;
+  position: relative;
+}
+
+.social-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Right panel */
+.s1-right {
+  flex: 1;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.s1-banner {
+  height: 90px;
+  background: url('https://lh3.googleusercontent.com/d/1s1X-xm1bJ_DZ_0nHl6u00mttLSVE31lK=w1000') center center / cover no-repeat;
+  position: relative;
+}
+.s1-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #0c0c14 0%, transparent 50%);
+}
+
+.s1-body {
+  padding: 16px 24px 20px;
+  flex: 1;
+}
+
+.s1-fullname {
+  font-family: 'Syne', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.s1-fullname span {
+  background: linear-gradient(90deg, #ff2d78, #b060ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.s1-jobtitle {
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: #9080cc;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.s1-hline {
+  margin: 12px 0;
+  height: 1px;
+  background: linear-gradient(90deg, #ff2d7833 0%, #633cff33 50%, transparent 100%);
+}
+
+.s1-contacts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.s1-contact-item { display: flex; align-items: center; gap: 7px; }
+.s1-contact-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+.s1-contact-info { }
+.s1-clabel {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #3d3d6a;
+  font-family: 'Syne', sans-serif;
+}
+.s1-cval {
+  font-size: 12px;
+  color: #d0caff;
+  font-weight: 400;
+  margin-top: 1px;
+}
+.s1-cval a { color: #d0caff; text-decoration: none; }
+.s1-cval.ph { color: #3a3a6a; font-style: italic; font-size: 11px; }
+
+.s1-addr {
+  margin-top: 10px;
+  font-size: 10.5px;
+  color: #555580;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.s1-bottom-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #ff2d78 0%, #633cff 50%, #00e5ff 100%);
+}
+
+
+/* ══════════════════════════════════════════
+   TEMPLATE 2 — EDITORIAL LIGHT
+   Clean white card, bold typography, 
+   left accent stripe, minimal luxury
+══════════════════════════════════════════ */
+#sig2 {
+  width: 680px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.s2-stripe {
+  width: 6px;
+  background: linear-gradient(180deg, #1a0550 0%, #4b1aff 40%, #00c8ff 100%);
+  flex-shrink: 0;
+}
+
+.s2-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.s2-top {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px 16px;
+  gap: 18px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.s2-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(75,26,255,0.2);
+}
+.s2-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.s2-nameblock { flex: 1; }
+.s2-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #0a0a1a;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.s2-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.s2-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b1aff;
+  letter-spacing: 0.3px;
+}
+.s2-sep { color: #ddd; font-size: 10px; }
+.s2-company { font-size: 11px; color: #999; font-weight: 400; }
+
+.s2-logo-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding-right: 4px;
+}
+.s2-website {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a0550;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+.s2-website span { color: #4b1aff; }
+.s2-badge {
+  margin-top: 4px;
+  background: #f3f0ff;
+  border: 1px solid #e0d8ff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #7060cc;
+  font-family: 'Syne', sans-serif;
+}
+
+.s2-bottom {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.s2-contacts-area {
+  flex: 1;
+  padding: 14px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+  border-right: 1px solid #f0f0f0;
+}
+
+.s2-ci { display: flex; align-items: flex-start; gap: 8px; }
+.s2-ci-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: #f5f3ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.s2-ci-icon svg { width: 13px; height: 13px; }
+.s2-ci-label { font-size: 8.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #bbb; font-family: 'Syne', sans-serif; }
+.s2-ci-val { font-size: 12px; color: #222; font-weight: 500; margin-top: 1px; }
+.s2-ci-val a { color: #222; text-decoration: none; }
+.s2-ci-val.ph { color: #ccc; font-style: italic; font-weight: 300; font-size: 11px; }
+
+.s2-addr-area {
+  padding: 14px 20px 14px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 180px;
+}
+.s2-addr-text {
+  font-size: 10.5px;
+  color: #aaa;
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.s2-socials-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.s2-soc {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: #f8f8ff;
+  border: 1px solid #ececff;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  transition: all .15s;
+}
+.s2-soc:hover { background: #f0edff; border-color: #c0b0ff; }
+.s2-soc svg { width: 12px; height: 12px; }
+
+.s2-footer {
+  height: 3px;
+  background: linear-gradient(90deg, #1a0550 0%, #4b1aff 50%, #00c8ff 100%);
+}
+
+/* ══════════════════════════════════════════
+   TEMPLATE 3 — DARK GLASSMORPHISM
+   Frosted glass panels, aurora gradient bg,
+   horizontal layout, floating feel
+══════════════════════════════════════════ */
+#sig3-wrap {
+  width: 680px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+}
+
+#sig3-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    #0a0520 0%,
+    #0e1535 25%,
+    #150a30 50%,
+    #091520 75%,
+    #0a0520 100%
+  );
+}
+
+#sig3-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 50%, rgba(120,60,255,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 85% 20%, rgba(0,200,255,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 80%, rgba(255,50,120,0.10) 0%, transparent 50%);
+}
+
+#sig3 {
+  position: relative;
+  z-index: 1;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.s3-top-bar {
+  height: 2px;
+  background: linear-gradient(90deg, #7b3cff, #00c8ff, #ff2d78, #7b3cff);
+  background-size: 200% 100%;
+}
+
+.s3-main {
+  display: flex;
+  align-items: stretch;
+  padding: 22px 24px 20px;
+  gap: 0;
+}
+
+/* Left: avatar column */
+.s3-avatar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-right: 22px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.s3-avatar-ring {
+  position: relative;
+  width: 86px;
+  height: 86px;
+}
+.s3-avatar-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #7b3cff, #00c8ff, #ff2d78, #7b3cff);
+  animation: spin 4s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.s3-avatar-inner {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 1;
+}
+.s3-avatar-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.s3-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+.s3-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 6px #00e676;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.s3-status-text {
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Middle: name + contacts */
+.s3-info-col {
+  flex: 1;
+  padding: 0 22px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.s3-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.s3-role {
+  margin-top: 5px;
+  font-size: 11px;
+  color: rgba(180,160,255,0.8);
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.s3-tags {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.s3-tag {
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: rgba(99,60,255,0.15);
+  border: 1px solid rgba(99,60,255,0.25);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(180,160,255,0.7);
+  font-family: 'Syne', sans-serif;
+}
+.s3-tag.teal {
+  background: rgba(0,200,255,0.08);
+  border-color: rgba(0,200,255,0.2);
+  color: rgba(100,220,255,0.7);
+}
+
+.s3-contacts {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.s3-citem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.s3-citem svg { width: 13px; height: 13px; opacity: 0.6; flex-shrink: 0; }
+.s3-ctext {
+  font-size: 12px;
+  color: rgba(220,210,255,0.85);
+  font-weight: 400;
+}
+.s3-ctext a { color: rgba(220,210,255,0.85); text-decoration: none; }
+.s3-ctext.ph { color: rgba(100,100,160,0.6); font-style: italic; font-size: 11px; }
+.s3-clabel {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(100,100,160,0.5);
+  font-family: 'Syne', sans-serif;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+/* Right: socials + address */
+.s3-right-col {
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 160px;
+}
+
+.s3-socials-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.s3-soc {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  backdrop-filter: blur(4px);
+  transition: all .2s;
+}
+.s3-soc:hover {
+  background: rgba(99,60,255,0.2);
+  border-color: rgba(99,60,255,0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99,60,255,0.3);
+}
+.s3-soc svg { width: 15px; height: 15px; }
+
+.s3-addr {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 9.5px;
+  color: rgba(120,120,170,0.6);
+  line-height: 1.7;
+  font-weight: 300;
+}
+.s3-addr a { color: rgba(150,130,220,0.7); text-decoration: none; }
+
+.s3-bottom-bar {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #7b3cff 30%, #00c8ff 60%, transparent 100%);
+}
+
+</style>
+</head>
+<body>
+
+<div class="page-title">✦ &nbsp; Email Signature Collection — Chakra Sayan Roy &nbsp; ✦</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <button class="tab-btn active" onclick="showSig(1, this)">01 · Neon Split</button>
+  <button class="tab-btn" onclick="showSig(2, this)">02 · Editorial Light</button>
+  <button class="tab-btn" onclick="showSig(3, this)">03 · Glass Aurora</button>
+</div>
+
+
+<!-- ════════════════ TEMPLATE 1 — NEON SPLIT ════════════════ -->
+<div class="sig-section active" id="section1">
+  <div class="sig-label">Template 01 · Neon Split</div>
+  <div id="sig1">
+    <!-- LEFT PANEL -->
+    <div class="s1-left">
+      <div class="s1-avatar">
+        <img src="https://lh3.googleusercontent.com/d/1PjuY4FeOsnI7X6tMNeDUxrwuv6-p92oW=w1000?authuser=0" alt="Chakra Sayan Roy"/>
+      </div>
+      <div class="s1-name-short">Chakra<br>Sayan Roy</div>
+      <div class="s1-role-tag">Dev</div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="s1-right">
+      <div class="s1-banner"></div>
+      <div class="s1-body">
+        <div class="s1-fullname">Chakra <span>Sayan Roy</span></div>
+        <div class="s1-jobtitle">Associate Software Developer &nbsp;·&nbsp; Einetic Technologies PVT LTD</div>
+        <div class="s1-hline"></div>
+        <div class="s1-contacts">
+          <div class="s1-contact-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" fill="#ff2d78" opacity=".7"/></svg>
+            <div class="s1-contact-info">
+              <div class="s1-clabel">Phone</div>
+              <div class="s1-cval ph"><a href="tel:+91 89103 44048">+91 89103 44048</a></div>
+            </div>
+          </div>
+          <div class="s1-contact-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#00e5ff" opacity=".7"/></svg>
+            <div class="s1-contact-info">
+              <div class="s1-clabel">Email</div>
+              <div class="s1-cval ph"><a href="mailto:chakrasayanroy@gmail.com">chakrasayanroy@gmail.com</a></div>
+            </div>
+          </div>
+          <div class="s1-contact-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="#b060ff" opacity=".7"/></svg>
+            <div class="s1-contact-info">
+              <div class="s1-clabel">Website</div>
+              <div class="s1-cval"><a href="https://einetic.com">einetic.com</a></div>
+            </div>
+          </div>
+          <div class="s1-contact-item">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#ff9050" opacity=".7"/></svg>
+            <div class="s1-contact-info">
+              <div class="s1-clabel">Location</div>
+              <div class="s1-cval" style="font-size:10.5px;color:#9080cc;">Ground Floor, P-878, Block A, Lake Town, South Dumdum, West Bengal 700089</div>
+            </div>
+          </div>
+        </div>       
+        <div class="s1-socials">
+          <span class="social-label">Connect</span>
+          <a class="social-btn" href="https://www.linkedin.com/in/chakra-sayan-roy-4310052b9/" target="_blank">
+            <span class="s1-social-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#0A66C2"/></svg></span>
+          </a>
+          <a class="social-btn" href="https://github.com/LORDAKASH3000" target="_blank">
+            <span class="s1-social-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#aaaacc"/></svg></span>
+          </a>
+          <a class="social-btn" href="https://www.instagram.com/chakrasayanroy/" target="_blank">
+            <span class="s1-social-icon"><svg viewBox="0 0 24 24" fill="none"><defs><linearGradient id="ig1" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig1)"/></svg></span>
+          </a>
+          <a class="social-btn" href="https://x.com/chakrasayanroy" target="_blank">
+            <span class="s1-social-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="#aaaacc"/></svg></span>
+          </a>
+          <a class="social-btn" href="https://open.spotify.com/user/31iizyrxvskkr7r3gnq24mi25nli?si=1a01382617b541b3" target="_blank">
+            <span class="s1-social-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" fill="#1DB954"/></svg></span>
+          </a>
+          <a class="social-btn" href="https://www.facebook.com/chakrasayanroy" target="_blank">
+            <span class="s1-social-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="s1-bottom-bar"></div>
+    </div>
+  </div>
+  <div class="copy-wrap">
+    <button class="copy-btn" onclick="copySig('sig1')">Copy Signature HTML</button>
+    <div class="copy-hint" id="hint1">Paste directly into Gmail / Outlook HTML editor</div>
+  </div>
+</div>
+
+
+<!-- ════════════════ TEMPLATE 2 — EDITORIAL LIGHT ════════════════ -->
+<div class="sig-section" id="section2">
+  <div class="sig-label">Template 02 · Editorial Light</div>
+  <div id="sig2">
+    <div class="s2-stripe"></div>
+    <div class="s2-inner">
+      <div class="s2-top">
+        <div class="s2-photo">
+          <img src="https://lh3.googleusercontent.com/d/1PjuY4FeOsnI7X6tMNeDUxrwuv6-p92oW=w1000?authuser=0" alt="Chakra Sayan Roy"/>
+        </div>
+        <div class="s2-nameblock">
+          <div class="s2-name">Chakra Sayan Roy</div>
+          <div class="s2-title-line">
+            <span class="s2-title">Associate Software Developer</span>
+            <span class="s2-sep">·</span>
+            <span class="s2-company">Einetic Technologies PVT LTD</span>
+          </div>
+        </div>
+        <div class="s2-logo-area">
+          <a href="https://einetic.com" class="s2-website">einetic<span>.com</span></a>
+          <div class="s2-badge">Software Dev</div>
+        </div>
+      </div>
+      <div class="s2-bottom">
+        <div class="s2-contacts-area">
+          <div class="s2-ci">
+            <div class="s2-ci-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" fill="#4b1aff"/></svg></div>
+            <div><div class="s2-ci-label">Phone</div><div class="s2-ci-val ph">[ your number ]</div></div>
+          </div>
+          <div class="s2-ci">
+            <div class="s2-ci-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#4b1aff"/></svg></div>
+            <div><div class="s2-ci-label">Email</div><div class="s2-ci-val ph">[ your email ]</div></div>
+          </div>
+          <div class="s2-ci">
+            <div class="s2-ci-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="#4b1aff"/></svg></div>
+            <div><div class="s2-ci-label">Website</div><div class="s2-ci-val"><a href="https://einetic.com">einetic.com</a></div></div>
+          </div>
+          <div class="s2-ci">
+            <div class="s2-ci-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4b1aff"/></svg></div>
+            <div><div class="s2-ci-label">Location</div><div class="s2-ci-val" style="font-size:11px;color:#555;">Kolkata, WB 700089</div></div>
+          </div>
+        </div>
+        <div class="s2-addr-area">
+          <div class="s2-addr-text">Ground Floor, P-878, Block A<br>Lake Town, South Dumdum<br>West Bengal 700089, India</div>
+          <div class="s2-socials-row">
+            <a class="s2-soc" href="https://www.linkedin.com/in/chakra-sayan-roy-4310052b9/" title="LinkedIn" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#0A66C2"/></svg></a>
+            <a class="s2-soc" href="https://github.com/LORDAKASH3000" title="GitHub" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#333"/></svg></a>
+            <a class="s2-soc" href="https://www.instagram.com/chakrasayanroy/" title="Instagram" target="_blank"><svg viewBox="0 0 24 24" fill="none"><defs><linearGradient id="ig2" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig2)"/></svg></a>
+            <a class="s2-soc" href="https://x.com/chakrasayanroy" title="X" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="#111"/></svg></a>
+            <a class="s2-soc" href="https://open.spotify.com/user/31iizyrxvskkr7r3gnq24mi25nli?si=1a01382617b541b3" title="Spotify" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" fill="#1DB954"/></svg></a>
+            <a class="s2-soc" href="https://www.facebook.com/chakrasayanroy" title="Facebook" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="s2-footer"></div>
+    </div>
+  </div>
+  <div class="copy-wrap">
+    <button class="copy-btn" onclick="copySig('sig2')">Copy Signature HTML</button>
+    <div class="copy-hint" id="hint2">Paste directly into Gmail / Outlook HTML editor</div>
+  </div>
+</div>
+
+
+<!-- ════════════════ TEMPLATE 3 — GLASS AURORA ════════════════ -->
+<div class="sig-section" id="section3">
+  <div class="sig-label">Template 03 · Glass Aurora</div>
+  <div id="sig3-wrap">
+    <div id="sig3-bg"></div>
+    <div id="sig3">
+      <div class="s3-top-bar"></div>
+      <div class="s3-main">
+        <!-- Avatar col -->
+        <div class="s3-avatar-col">
+          <div class="s3-avatar-ring">
+            <div class="s3-avatar-inner">
+              <img src="https://lh3.googleusercontent.com/d/1PjuY4FeOsnI7X6tMNeDUxrwuv6-p92oW=w1000?authuser=0" alt="Chakra Sayan Roy"/>
+            </div>
+          </div>
+          <div class="s3-status">
+            <div class="s3-status-dot"></div>
+            <span class="s3-status-text">Available</span>
+          </div>
+        </div>
+
+        <!-- Info col -->
+        <div class="s3-info-col">
+          <div class="s3-name">Chakra Sayan Roy</div>
+          <div class="s3-role">Associate Software Developer · Einetic Technologies PVT LTD</div>
+          <div class="s3-tags">
+            <span class="s3-tag">Software Dev</span>
+            <span class="s3-tag teal">Einetic</span>
+            <span class="s3-tag">Kolkata</span>
+          </div>
+          <div class="s3-contacts">
+            <div class="s3-citem">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" fill="#9070ff"/></svg>
+              <span class="s3-clabel">Tel</span>
+              <span class="s3-ctext ph">[ your number ]</span>
+            </div>
+            <div class="s3-citem">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#00c8ff"/></svg>
+              <span class="s3-clabel">Mail</span>
+              <span class="s3-ctext ph">[ your email ]</span>
+            </div>
+            <div class="s3-citem">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="#b060ff"/></svg>
+              <span class="s3-clabel">Web</span>
+              <span class="s3-ctext"><a href="https://einetic.com">einetic.com</a></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col: socials + address -->
+        <div class="s3-right-col">
+          <div class="s3-socials-grid">
+            <a class="s3-soc" href="https://www.linkedin.com/in/chakra-sayan-roy-4310052b9/" title="LinkedIn" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#0A66C2"/></svg></a>
+            <a class="s3-soc" href="https://github.com/LORDAKASH3000" title="GitHub" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#e0dcff"/></svg></a>
+            <a class="s3-soc" href="https://www.instagram.com/chakrasayanroy/" title="Instagram" target="_blank"><svg viewBox="0 0 24 24" fill="none"><defs><linearGradient id="ig3" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig3)"/></svg></a>
+            <a class="s3-soc" href="https://x.com/chakrasayanroy" title="X" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="#e0dcff"/></svg></a>
+            <a class="s3-soc" href="https://open.spotify.com/user/31iizyrxvskkr7r3gnq24mi25nli?si=1a01382617b541b3" title="Spotify" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" fill="#1DB954"/></svg></a>
+            <a class="s3-soc" href="https://www.facebook.com/chakrasayanroy" title="Facebook" target="_blank"><svg viewBox="0 0 24 24" fill="none"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/></svg></a>
+          </div>
+          <div class="s3-addr">
+            📍 P-878, Block A, Lake Town<br>
+            Kolkata, WB 700089, India<br>
+            <a href="https://einetic.com">einetic.com</a>
+          </div>
+        </div>
+      </div>
+      <div class="s3-bottom-bar"></div>
+    </div>
+  </div>
+  <div class="copy-wrap">
+    <button class="copy-btn" onclick="copySig('sig3-wrap')">Copy Signature HTML</button>
+    <div class="copy-hint" id="hint3">Paste directly into Gmail / Outlook HTML editor</div>
+  </div>
+</div>
+
+<script>
+function showSig(n, btn) {
+  document.querySelectorAll('.sig-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section' + n).classList.add('active');
+  btn.classList.add('active');
+}
+
+function copySig(id) {
+
+  const element = document.getElementById(id);
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = element.outerHTML;
+  wrapper.style.position = "fixed";
+  wrapper.style.left = "-99999px";
+  wrapper.style.top = "0";
+  document.body.appendChild(wrapper);
+  const range = document.createRange();
+  range.selectNodeContents(wrapper);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  const successful = document.execCommand("copy");
+  selection.removeAllRanges();
+  document.body.removeChild(wrapper);
+  const activeSection = document.querySelector(".sig-section.active");
+  const hint = activeSection.querySelector(".copy-hint");
+  if (successful) {
+    hint.innerText = "Copied successfully — paste into Gmail";
+  } else {
+    hint.innerText = "Copy failed";
+  }
+}
+</script>
+</body>
+</html>
