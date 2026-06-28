@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Video Player</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --red: #ff0000;
+      --blue: #3ea6ff;
+      --bg: #0f0f0f;
+      --bg2: #181818;
+      --glass2: rgba(15, 15, 15, 0.93);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: rgba(255, 255, 255, 0.9);
+      --muted: rgba(255, 255, 255, 0.45);
+      --chat-w: 400px;
+      --ctrl-h: 48px;
+    }
+
+    html,
+    body {
+      background: var(--glass2);
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #fff
+    }
+
+    /* ── URL BAR ── */
+    #url-bar {
+      background: #181818;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #url-input {
+      flex: 1;
+      min-width: 180px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    #url-input:focus {
+      border-color: var(--blue)
+    }
+
+    #url-load {
+      background: var(--blue);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity .15s;
+    }
+
+    #url-load:hover {
+      opacity: .85
+    }
+
+    #file-btn {
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .15s;
+    }
+
+    #file-btn:hover {
+      background: rgba(255, 255, 255, .14);
+      border-color: rgba(255, 255, 255, .3)
+    }
+
+    #file-input {
+      display: none
+    }
+
+    .demo-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .chip {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+
+    .chip:hover {
+      background: rgba(255, 255, 255, .09);
+      color: #fff;
+      border-color: rgba(255, 255, 255, .3)
+    }
+
+    .chip.active-chip {
+      border-color: var(--blue);
+      color: var(--blue)
+    }
+
+    /* ── STAGE — this is the entire player; it's a standalone, self-
+       contained component. Nothing outside #stage belongs to it. ── */
+    #stage {
+      display: flex;
+      align-items: stretch;
+      background: #000;
+      width: 100%;
+      border-radius: 25px;      /* ← add */
+      overflow: hidden;         /* ← add, clips video to the rounded corners */
+      transition: all .3s
+    }
+
+    /* ── VIDEO CONTAINER ── */
+    #vc {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      background: #000;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    #vc.show-cursor {
+      cursor: default
+    }
+
+    #aspect-box {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 50px;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    /* ── PLACEHOLDER ── */
+    #placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      background: radial-gradient(ellipse at center, #1c1c1c 0%, #000 100%);
+      z-index: 2;
+    }
+
+    #placeholder i {
+      font-size: 58px;
+      opacity: .22
+    }
+
+    #placeholder span {
+      opacity: .5;
+      text-align: center;
+      padding: 0 20px
+    }
+
+    /* ── GRADIENTS ── */
+    .grad {
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      z-index: 4;
+      opacity: 0;
+      transition: opacity .3s
+    }
+
+    #grad-top {
+      top: 0;
+      height: 140px;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, .88), transparent)
+    }
+
+    #grad-bot {
+      bottom: 0;
+      height: 180px;
+      background: linear-gradient(to top, rgba(0, 0, 0, .92), transparent)
+    }
+
+    #vc.show-ui .grad {
+      opacity: 1
+    }
+
+    /* ── RIPPLE ── */
+    #ripple {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 8
+    }
+
+    .rip-ring {
+      width: 80px;
+      height: 80px;
+      background: rgba(0, 0, 0, .5);
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, .2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(.7);
+      transition: opacity .15s, transform .15s;
+    }
+
+    .rip-ring.show {
+      opacity: 1;
+      transform: scale(1)
+    }
+
+    .rip-ring i {
+      font-size: 28px;
+      color: #fff
+    }
+
+    /* ── SPINNER ── */
+    #spinner {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+      pointer-events: none
+    }
+
+    #spinner.show {
+      display: flex
+    }
+
+    .spin-ring {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255, 255, 255, .15);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .75s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ── TOP BAR (title + top-right buttons) ── */
+    #top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 14px 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    #vc.show-ui #top-bar {
+      opacity: 1;
+      pointer-events: auto
+    }
+
+    #top-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, .9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60%;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0
+    }
+
+    /* ── TIMESTAMPS PANEL (left overlay) ── */
+    #ts-panel {
+      position: absolute;
+      left: 12px;
+      top: 60px;
+      bottom: 66px;
+      width: 248px;
+      z-index: 9;
+      background: var(--glass2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-275px);
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    #ts-panel.open {
+      transform: translateX(0)
+    }
+
+    .panel-hdr {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .panel-hdr-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .panel-hdr-title i {
+      color: var(--blue)
+    }
+
+    .panel-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+
+    .panel-close:hover {
+      background: rgba(255, 255, 255, .1);
+      color: #fff
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px
+    }
+
+    .panel-body::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .panel-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, .18);
+      border-radius: 2px
+    }
+
+    .ts-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, .75);
+      font-size: 12px;
+      transition: all .12s;
+    }
+
+    .ts-item:hover {
+      background: rgba(255, 255, 255, .09);
+      color: #fff
+    }
+
+    .ts-item .ts-time {
+      color: var(--blue);
+      min-width: 38px;
+      font-weight: 700;
+      font-size: 11px
+    }
+
+    .ts-item.active-ts {
+      background: rgba(62, 166, 255, .12);
+      color: #fff
+    }
+
+    /* ── CONTROLS OVERLAY (floating bottom) ── */
+    #ctrl-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    #vc.show-ui #ctrl-overlay {
+      opacity: 1;
+      pointer-events: auto
+    }
+
+    /* seekbar */
+    #seek-area {
+      padding: 0 12px 2px;
+      position: relative
+    }
+
+    #seek-track {
+      height: 3px;
+      background: rgba(255, 255, 255, .2);
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+      transition: height .15s
+    }
+
+    #seek-track:hover {
+      height: 5px
+    }
+
+    #seek-buf {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: rgba(255, 255, 255, .3);
+      border-radius: 3px;
+      width: 0
+    }
+
+    #seek-prog {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: var(--red);
+      border-radius: 3px;
+      width: 0
+    }
+
+    #seek-dot {
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      left: 0;
+      opacity: 0;
+      transition: opacity .15s;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, .7)
+    }
+
+    #seek-track:hover #seek-dot {
+      opacity: 1
+    }
+
+    #seek-tip {
+      position: absolute;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(22, 22, 22, .96);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 5px;
+      pointer-events: none;
+      opacity: 0;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, .1)
+    }
+
+    .ch-marker {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(255, 255, 255, .3);
+      pointer-events: none
+    }
+
+    .ch-label-bar {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .4);
+      margin-top: 3px;
+      height: 14px
+    }
+
+    /* ── BOTTOM CONTROL ROW ── */
+    #ctrl-row {
+      display: flex;
+      align-items: center;
+      padding: 2px 4px 8px;
+      height: var(--ctrl-h);
+    }
+
+    .cb {
+      background: none;
+      border: none;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      transition: background .12s;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .cb:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .cb.active {
+      color: var(--blue)
+    }
+
+    .cb[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 18, 18, .97);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 5px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 99;
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    /* ── NO-SRC STATE ──
+       Until a video src is actually set, none of the playback controls
+       make sense, so they're disabled (dimmed + inert) rather than
+       silently doing nothing or throwing on an empty media element. */
+    #vc.no-src #ctrl-overlay,
+    #vc.no-src #top-bar {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    #vc.no-src #placeholder {
+      display: flex !important;
+    }
+
+    /* ts-btn / chat-btn only appear once VideoPlayer.init() is told an
+       element id for that panel exists — see VideoPlayer.init() in JS */
+    #ts-btn,
+    #chat-btn {
+      display: none;
+    }
+
+    #top-bar.has-ts #ts-btn,
+    #top-bar.has-chat #chat-btn {
+      display: flex;
+    }
+
+    #vol-group {
+      display: flex;
+      align-items: center;
+      gap: 2px
+    }
+
+    #vol-slider {
+      width: 0;
+      overflow: hidden;
+      transition: width .2s;
+      accent-color: #fff;
+      cursor: pointer
+    }
+
+    #vol-group:hover #vol-slider {
+      width: 66px
+    }
+
+    #time-display {
+      color: rgba(255, 255, 255, .85);
+      font-size: 12px;
+      white-space: nowrap;
+      padding: 0 8px;
+      font-variant-numeric: tabular-nums
+    }
+
+    .spacer {
+      flex: 1
+    }
+
+    #ch-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, .5);
+      font-size: 11px;
+      padding: 0 4px;
+      white-space: nowrap;
+      cursor: pointer;
+      max-width: 110px;
+      overflow: hidden
+    }
+
+    #ch-badge i {
+      font-size: 11px;
+      flex-shrink: 0
+    }
+
+    #ch-badge span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    /* ── YOUTUBE-STYLE ACTION BAR (bottom of video, above seek) ── */
+    /* This sits INSIDE the ctrl-overlay, above the seekbar */
+    #yt-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 6px;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    #vc.show-ui #yt-action-bar {
+      opacity: 1;
+      pointer-events: auto
+    }
+
+    /* left group: like dislike comment share clip save more */
+    .yt-left {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    /* right group: autoplay cc settings miniplayer fullscreen */
+    .yt-right {
+      display: flex;
+      align-items: center;
+      gap: 2px
+    }
+
+    /* pill group (like + dislike in one pill like YT) */
+    .yt-pill {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, .1);
+      border-radius: 22px;
+      overflow: hidden;
+    }
+
+    .yt-pill-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .12s;
+      white-space: nowrap;
+    }
+
+    .yt-pill-btn:hover {
+      background: rgba(255, 255, 255, .12)
+    }
+
+    .yt-pill-btn.liked {
+      color: var(--blue)
+    }
+
+    .yt-pill-btn.disliked {
+      color: #f55
+    }
+
+    .yt-pill-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, .2);
+      flex-shrink: 0
+    }
+
+    /* standalone action pills */
+    .yt-action-btn {
+      background: rgba(255, 255, 255, .1);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 22px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .12s;
+      white-space: nowrap;
+    }
+
+    .yt-action-btn:hover {
+      background: rgba(255, 255, 255, .18)
+    }
+
+    .yt-action-btn.saved {
+      background: rgba(255, 255, 255, .2)
+    }
+
+    /* right icon buttons */
+    .yt-icon-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background .12s;
+      position: relative;
+    }
+
+    .yt-icon-btn:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .yt-icon-btn.active {
+      color: var(--blue)
+    }
+
+    .yt-icon-btn[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 18, 18, .97);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 5px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 99;
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    /* settings popup */
+    .pop {
+      position: absolute;
+      bottom: 100px;
+      right: 44px;
+      background: #1f1f1f;
+      border-radius: 10px;
+      padding: 4px 0;
+      min-width: 175px;
+      z-index: 50;
+      display: none;
+      border: 1px solid rgba(255, 255, 255, .14);
+      box-shadow: 0 8px 36px rgba(0, 0, 0, .7);
+    }
+
+    .pop-row {
+      padding: 9px 18px;
+      font-size: 13px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: background .1s;
+    }
+
+    .pop-row:hover {
+      background: rgba(255, 255, 255, .08)
+    }
+
+    .pop-row.sel {
+      font-weight: 600;
+      color: var(--blue)
+    }
+
+    .pop-section {
+      padding: 7px 18px 3px;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px
+    }
+
+    .pop-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0
+    }
+
+    /* ── CHAT / TIMESTAMPS PANEL CONTENT (reusable) ── */
+    /* This is the look of the user's own sidebar elements on the page.
+       When idle (not in fullscreen) they render at this fixed width inline
+       wherever the user placed them in the document. When the player goes
+       fullscreen, VideoPlayer moves these nodes into .portal-slot, which
+       takes over sizing (width:100%/height:100%) — see .portal-slot > *. */
+    #chat-sidebar,
+    #ts-sidebar {
+      width: var(--chat-w);
+      max-width: 100%;
+      height: 90dvh;
+      background: #181818;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* outside fullscreen, only one of the two widgets is visible at a time */
+    #external-widgets.widgets-hidden-ts #ts-sidebar,
+    #external-widgets.widgets-hidden-chat #chat-sidebar {
+      display: none;
+    }
+
+    /* simple tab switcher so the demo page can flip between the two —
+       this lives in the test harness, the player has nothing to do with it */
+    .widget-switch {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .widget-switch button {
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .15s;
+    }
+
+    .widget-switch button:hover {
+      background: rgba(255, 255, 255, .12);
+      color: #fff;
+    }
+
+    .widget-switch button.active {
+      background: var(--blue);
+      color: #000;
+      border-color: var(--blue);
+    }
+
+    .chat-hdr {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0
+    }
+
+    .chat-hdr-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .chat-hdr-left i {
+      color: var(--blue)
+    }
+
+    .chat-hdr-right {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .chat-watchers {
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .chat-close-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 15px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s
+    }
+
+    .chat-close-btn:hover {
+      background: rgba(255, 255, 255, .1);
+      color: #fff
+    }
+
+    .chat-msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    .chat-msgs::-webkit-scrollbar {
+      width: 4px
+    }
+
+    .chat-msgs::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, .15);
+      border-radius: 2px
+    }
+
+    .chat-msg {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .8);
+      padding: 5px 8px;
+      line-height: 1.55;
+      border-radius: 6px;
+      transition: background .1s
+    }
+
+    .chat-msg:hover {
+      background: rgba(255, 255, 255, .05)
+    }
+
+    .chat-msg b {
+      color: var(--blue);
+      margin-right: 5px
+    }
+
+    .chat-input-wrap {
+      padding: 10px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0
+    }
+
+    .chat-input {
+      width: 100%;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 20px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 12px;
+      outline: none
+    }
+
+    .chat-input:focus {
+      border-color: var(--blue)
+    }
+
+    /* ── BELOW VIDEO ── */
+    #below {
+      background: var(--bg);
+      padding: 0 4px
+    }
+
+    #meta {
+      padding: 10px 12px 12px
+    }
+
+    #meta h2 {
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 4px
+    }
+
+    #meta p {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    #comments-panel {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .35s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    #comments-panel.open {
+      max-height: 300px;
+      overflow-y: auto
+    }
+
+    #comments-panel::-webkit-scrollbar {
+      width: 4px
+    }
+
+    #comments-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, .15);
+      border-radius: 2px
+    }
+
+    .cmt {
+      display: flex;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .cavatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0
+    }
+
+    .cbody p:first-child {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .9);
+      margin-bottom: 3px
+    }
+
+    .cbody p:last-child {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .55);
+      line-height: 1.5
+    }
+
+    /* ── UTIL BAR ── */
+    #util-bar {
+      background: #111;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .util-btn {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, .14);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all .15s
+    }
+
+    .util-btn:hover {
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      border-color: rgba(255, 255, 255, .28)
+    }
+
+    .util-btn i {
+      font-size: 13px
+    }
+
+    .util-group {
+      display: flex;
+      gap: 6px
+    }
+
+    .kbd {
+      font-size: 10px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap
+    }
+
+    .kbd kbd {
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-family: monospace
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(25, 25, 25, .97);
+      color: #fff;
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all .25s;
+      pointer-events: none;
+      z-index: 9999;
+      border: 1px solid rgba(255, 255, 255, .12);
+      white-space: nowrap
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    /* fullscreen */
+    :fullscreen #stage {
+      height: 100vh
+    }
+
+    :fullscreen #vc {
+      height: 100%
+    }
+
+    :fullscreen #aspect-box {
+      aspect-ratio: unset;
+      height: 100%
+    }
+
+    /* ── THEATER MODE — test-harness behavior, manipulates layout around
+       the player (#stage); the player itself doesn't know this mode exists ── */
+    body.theater-mode {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body.theater-mode #url-bar {
+      flex-shrink: 0;
+    }
+
+    body.theater-mode #stage {
+      flex: 1;
+      min-height: 0;
+    }
+
+    body.theater-mode #vc {
+      height: 100%;
+    }
+
+    body.theater-mode #aspect-box {
+      aspect-ratio: unset !important;
+      height: 100% !important;
+    }
+
+    body.theater-mode #below,
+    body.theater-mode #util-bar {
+      display: none;
+    }
+
+    /* ── PORTAL SLOTS (inside the player) ── */
+    /* These sit in #stage exactly where chat/timestamps panels used to live.
+       At runtime, VideoPlayer.init() physically MOVES the user's real chat/ts
+       elements into these slots when entering fullscreen, and moves them back
+       to their original place (marked by a placeholder) on exit. Both slots
+       share identical chrome — width, border, transition — so whichever
+       element is plugged in inherits the same sidebar look. */
+    .portal-slot {
+      width: 0;
+      overflow: hidden;
+      background: #181818;
+      border-left: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      transition: width .3s cubic-bezier(.4, 0, .2, 1), border-color .3s;
+      flex-shrink: 0;
+    }
+
+    .portal-slot.open {
+      width: var(--chat-w);
+      border-color: var(--border);
+    }
+
+    /* the user's real element, once living inside our slot, fills it */
+    .portal-slot > * {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* placeholder left behind on the page where the real sidebar used to be */
+    .vp-placeholder {
+      display: none;
+    }
+  </style>
+  <style>
+    .audience-stage {
+      display: flex;
+      flex-direction: row;
+    }
+    .stage-metainfo {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+  </style>
+  <!-- ── RESPONSIVE BREAKPOINTS ──────────────────────────────────────────
+       Pure additive media queries — no existing rule above is changed.
+       These only kick in below the listed widths, so the original
+       desktop design is pixel-identical above ~1100px. ── -->
+  <style>
+    /* ════════ ≤1100px — tablet / small laptop ════════
+       Stack the chat/chapters sidebar under the player instead of
+       beside it, and let the sidebar take the full available width. */
+    @media (max-width: 1100px) {
+      .audience-stage {
+        flex-direction: column;
+      }
+      #external-widgets {
+        padding: 16px !important;
+        margin: 0 !important;
+        width: 100%;
+      }
+      #chat-sidebar,
+      #ts-sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: 70dvh;
+      }
+    }
+
+    /* ════════ ≤900px — large phones / small tablets, portrait ════════ */
+    @media (max-width: 900px) {
+      #ts-panel {
+        width: min(248px, 78vw);
+      }
+
+      .pop {
+        right: 12px;
+        bottom: 96px;
+        min-width: 160px;
+      }
+    }
+
+    /* ════════ ≤700px — phones ════════
+       Tighten paddings/gaps and let the action bar wrap instead of
+       overflowing; shrink the round buttons just enough to keep every
+       control on-screen without changing their look. */
+    @media (max-width: 700px) {
+      #url-bar {
+        padding: 8px 10px;
+      }
+
+      #url-input {
+        min-width: 140px;
+        font-size: 12px;
+      }
+
+      #url-load,
+      #file-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      .demo-chips {
+        width: 100%;
+      }
+
+      #top-bar {
+        padding: 10px 10px;
+      }
+
+      #top-title {
+        font-size: 12px;
+        max-width: 50%;
+      }
+
+      /* No wrapping here — wrapping pills/circles onto a second line is
+         what caused buttons to stack on top of each other. Instead, each
+         half scrolls horizontally if it doesn't fit, and labels collapse
+         to icon-only so it usually fits without scrolling at all. */
+      #yt-action-bar {
+        flex-wrap: nowrap;
+        padding: 0 8px 6px;
+        gap: 6px;
+      }
+
+      .yt-left,
+      .yt-right {
+        flex-wrap: nowrap;
+        flex-shrink: 1;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .yt-left::-webkit-scrollbar,
+      .yt-right::-webkit-scrollbar {
+        display: none;
+      }
+
+      .yt-left > *,
+      .yt-right > * {
+        flex-shrink: 0;
+      }
+
+      .yt-action-btn span,
+      .yt-pill-btn span {
+        display: none;
+      }
+
+      .yt-action-btn {
+        padding: 8px;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        justify-content: center;
+        gap: 0;
+      }
+
+      .yt-pill-btn {
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+
+      .yt-icon-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+      }
+
+      #ctrl-row {
+        padding: 2px 2px 8px;
+        gap: 0;
+      }
+
+      .cb {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+      }
+
+      #time-display {
+        font-size: 11px;
+        padding: 0 4px;
+      }
+
+      #ch-badge {
+        max-width: 70px;
+        font-size: 10px;
+      }
+
+      #vol-group:hover #vol-slider,
+      #vol-group:focus-within #vol-slider {
+        width: 50px;
+      }
+
+      #ts-panel {
+        left: 8px;
+        top: 52px;
+        bottom: 58px;
+        width: min(220px, 70vw);
+      }
+
+      #meta h2 {
+        font-size: 14px;
+      }
+
+      #meta p {
+        font-size: 11px;
+      }
+
+      #util-bar {
+        padding: 8px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .util-btn {
+        font-size: 10px;
+        padding: 6px 10px;
+      }
+
+      .kbd {
+        font-size: 9px;
+      }
+
+      .chat-hdr,
+      .panel-hdr {
+        padding: 10px 12px;
+      }
+
+      .chat-input,
+      .chat-msg {
+        font-size: 12px;
+      }
+    }
+
+    /* ════════ ≤480px — small phones ════════
+       Drop the least essential chrome and make sure nothing clips. */
+    @media (max-width: 480px) {
+      #url-bar {
+        gap: 6px;
+      }
+
+      .demo-chips {
+        gap: 4px;
+      }
+
+      .chip {
+        padding: 4px 10px;
+        font-size: 10px;
+      }
+
+      #top-title {
+        max-width: 42%;
+      }
+
+      #ch-badge {
+        display: none;
+      }
+
+      .kbd {
+        display: none;
+      }
+
+      #util-bar {
+        gap: 6px;
+      }
+
+      .pop {
+        right: 6px;
+        left: 6px;
+        min-width: 0;
+        width: auto;
+      }
+
+      #ts-panel,
+      .portal-slot.open {
+        width: 92vw;
+      }
+    }
+
+    /* ════════ ≤360px — very narrow phones (e.g. older/small devices) ════════
+       Last-resort safety net: allow the bottom control row to scroll
+       horizontally rather than clip if every control truly can't fit. */
+    @media (max-width: 360px) {
+      #ctrl-row {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #ctrl-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .cb {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      #placeholder i {
+        font-size: 42px;
+      }
+
+      #placeholder span {
+        font-size: 12px;
+        padding: 0 12px;
+      }
+    }
+
+    /* ════════ short / landscape phones ════════
+       In landscape on a phone, vertical space is the constraint, not
+       width — keep panels from running off the bottom of the screen. */
+    @media (max-height: 480px) and (orientation: landscape) {
+      #ts-panel {
+        top: 48px;
+        bottom: 48px;
+      }
+
+      #chat-sidebar,
+      #ts-sidebar {
+        height: 80dvh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="url-bar">
+    <input id="url-input" type="text" placeholder="Paste a direct .mp4 / .webm URL…" spellcheck="false">
+    <button id="url-load"><i class="fa-solid fa-circle-play"></i> Load</button>
+    <button id="file-btn"><i class="fa-solid fa-folder-open"></i> Local File</button>
+    <input type="file" id="file-input" accept="video/*">
+    <div class="demo-chips">
+      <button class="chip" data-url="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        data-title="Big Buck Bunny" data-sub="Blender Foundation · 9:56"><i class="fa-solid fa-rabbit"></i> Big Buck
+        Bunny</button>
+      <button class="chip"
+        data-url="https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320p_stereo.mp4"
+        data-title="Big Buck Bunny 320p" data-sub="Blender Foundation · mirror"><i
+          class="fa-solid fa-circle-play"></i> BBB Mirror</button>
+      <button class="chip" data-url="https://media.w3.org/2010/05/sintel/trailer.mp4" data-title="Sintel Trailer"
+        data-sub="Blender Foundation · W3C mirror"><i class="fa-solid fa-dragon"></i> Sintel</button>
+      <button class="chip" data-url="https://media.w3.org/2010/05/video/movie_300.mp4" data-title="W3C Sample"
+        data-sub="W3C test video"><i class="fa-solid fa-film"></i> W3C Sample</button>
+      <button class="chip" data-url="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
+        data-title="Sample MP4" data-sub="Learning Container"><i class="fa-solid fa-video"></i> Sample MP4</button>
+    </div>
+  </div>
+  <div class="audience-stage">
+    <div class="stage-metainfo">
+      <div id="stage">
+          <div id="vc" class="no-src">
+            <div id="aspect-box">
+              <video id="vid" preload="metadata"></video>
+    
+              <div id="placeholder">
+                <i class="fa-solid fa-circle-play"></i>
+                <span>Pick a demo, paste a URL, or open a local file</span>
+              </div>
+              <div id="spinner">
+                <div class="spin-ring"></div>
+              </div>
+    
+              <div class="grad" id="grad-top"></div>
+              <div class="grad" id="grad-bot"></div>
+    
+              <div id="ripple">
+                <div class="rip-ring" id="rip-ring"><i class="fa-solid fa-play"></i></div>
+              </div>
+    
+              <!-- Top bar -->
+              <div id="top-bar">
+                <span id="top-title">—</span>
+                <div class="top-actions">
+                  <button class="cb" id="ts-btn" data-tip="Chapters (fullscreen)"><i class="fa-solid fa-list-ol"></i></button>
+                  <button class="cb" id="chat-btn" data-tip="Live Chat (fullscreen)"><i class="fa-solid fa-comments"></i></button>
+                </div>
+              </div>
+    
+              <!-- Controls overlay -->
+              <div id="ctrl-overlay">
+    
+                <!-- ── YOUTUBE-STYLE ACTION BAR ── -->
+                <div id="yt-action-bar">
+                  <!-- Left: Like pill + Dislike + Share + Clip + Save + More -->
+                  <div class="yt-left">
+                    <!-- Like/Dislike pill -->
+                    <div class="yt-pill">
+                      <button class="yt-pill-btn" id="like-btn" title="Like">
+                        <i class="fa-regular fa-thumbs-up"></i>
+                        <span id="like-count">24K</span>
+                      </button>
+                      <div class="yt-pill-sep"></div>
+                      <button class="yt-pill-btn" id="dislike-btn" title="Dislike">
+                        <i class="fa-regular fa-thumbs-down"></i>
+                      </button>
+                    </div>
+                    <button class="yt-action-btn" id="share-btn"><i class="fa-solid fa-share-nodes"></i> <span>Share</span></button>
+                    <button class="yt-action-btn" id="clip-btn"><i class="fa-solid fa-scissors"></i> <span>Clip</span></button>
+                    <button class="yt-action-btn" id="save-btn"><i class="fa-regular fa-bookmark"></i> <span>Save</span></button>
+                    <button class="yt-action-btn" id="more-btn"><i class="fa-solid fa-ellipsis"></i></button>
+                  </div>
+                  <!-- Right: autoplay toggle · CC · settings · pip · fullscreen -->
+                  <div class="yt-right">
+                    <button class="yt-icon-btn" id="autoplay-btn" data-tip="Autoplay"><i class="fa-solid fa-circle-play"
+                        style="font-size:20px"></i></button>
+                    <button class="yt-icon-btn" id="cc-btn" data-tip="Captions (C)"><i
+                        class="fa-solid fa-closed-captioning"></i></button>
+                    <button class="yt-icon-btn" id="settings-btn" data-tip="Settings"><i
+                        class="fa-solid fa-gear"></i></button>
+                    <button class="yt-icon-btn" id="pip-btn" data-tip="Miniplayer"><i
+                        class="fa-solid fa-window-restore"></i></button>
+                    <button class="yt-icon-btn" id="fs-btn" data-tip="Fullscreen (F)"><i
+                        class="fa-solid fa-expand"></i></button>
+                  </div>
+                </div>
+    
+                <!-- Seekbar -->
+                <div id="seek-area">
+                  <div id="seek-track">
+                    <div id="seek-buf"></div>
+                    <div id="seek-prog"></div>
+                    <div id="seek-dot"></div>
+                    <div id="seek-tip"></div>
+                  </div>
+                  <div class="ch-label-bar" id="ch-label"></div>
+                </div>
+    
+                <!-- Bottom control row: play skip vol time | chapter | -->
+                <div id="ctrl-row">
+                  <button class="cb" id="play-btn" data-tip="Play / Pause (K)"><i class="fa-solid fa-play"></i></button>
+                  <button class="cb" id="prev-btn" data-tip="Back 10s (J)"><i
+                      class="fa-solid fa-backward-step"></i></button>
+                  <button class="cb" id="next-btn" data-tip="Forward 10s (L)"><i
+                      class="fa-solid fa-forward-step"></i></button>
+                  <div id="vol-group">
+                    <button class="cb" id="mute-btn" data-tip="Mute (M)"><i class="fa-solid fa-volume-high"></i></button>
+                    <input type="range" id="vol-slider" min="0" max="100" value="100">
+                  </div>
+                  <span id="time-display">0:00 / 0:00</span>
+                  <div class="spacer"></div>
+                  <div id="ch-badge"><i class="fa-solid fa-clapperboard"></i><span id="ch-name"></span></div>
+                </div>
+    
+                <!-- Settings popup -->
+                <div class="pop" id="pop-settings">
+                  <div class="pop-section">Playback Speed</div>
+                  <div class="pop-row" data-s="0.25">0.25×</div>
+                  <div class="pop-row" data-s="0.5">0.5×</div>
+                  <div class="pop-row" data-s="0.75">0.75×</div>
+                  <div class="pop-row sel" data-s="1">Normal <i class="fa-solid fa-check" style="color:var(--blue)"></i>
+                  </div>
+                  <div class="pop-row" data-s="1.25">1.25×</div>
+                  <div class="pop-row" data-s="1.5">1.5×</div>
+                  <div class="pop-row" data-s="2">2×</div>
+                  <div class="pop-divider"></div>
+                  <div class="pop-section">Quality</div>
+                  <div class="pop-row sel" data-q="auto">Auto <i class="fa-solid fa-check" style="color:var(--blue)"></i>
+                  </div>
+                  <div class="pop-row" data-q="1080">1080p HD</div>
+                  <div class="pop-row" data-q="720">720p</div>
+                  <div class="pop-row" data-q="480">480p</div>
+                </div>
+              </div><!-- ctrl-overlay -->
+    
+            </div><!-- aspect-box -->
+          </div><!-- vc -->
+    
+          <!-- PORTAL SLOT — timestamps/chapters element gets moved in here on fullscreen -->
+          <div class="portal-slot" id="ts-slot"></div>
+    
+          <!-- PORTAL SLOT — chat element gets moved in here on fullscreen -->
+          <div class="portal-slot" id="chat-slot"></div>
+      </div>
+      <div>
+        <div id="below">
+          <div id="meta">
+            <h2 id="meta-title">Pick a demo video or open a local file</h2>
+            <p id="meta-sub">Supports .mp4, .webm, .ogg and direct URLs</p>
+          </div>
+          <div id="comments-panel"></div>
+        </div>
+      
+        <div id="util-bar">
+          <div class="util-group">
+            <button class="util-btn" id="theater-btn"><i class="fa-solid fa-expand"></i> Theater Mode</button>
+            <button class="util-btn" id="real-fs-btn"><i class="fa-solid fa-tv"></i> True Fullscreen</button>
+            <button class="util-btn" id="cmt-toggle"><i class="fa-solid fa-comment"></i> Comments</button>
+          </div>
+          <div class="kbd">
+            <kbd>K</kbd>/<kbd>Space</kbd> play &nbsp;
+            <kbd>J</kbd>/<kbd>L</kbd> ±10s &nbsp;
+            <kbd>M</kbd> mute &nbsp;
+            <kbd>F</kbd> fullscreen &nbsp;
+            <kbd>T</kbd> theater &nbsp;
+            <kbd>C</kbd> captions
+          </div>
+        </div>
+      </div>
+    </div>  
+    <div id="external-widgets" class="widgets-hidden-chat" style="padding:20px;margin:0 auto;">
+      <div id="ts-sidebar">
+        <div class="chat-hdr">
+          <div class="chat-hdr-left"><i class="fa-solid fa-list-ol" style="color:var(--blue)"></i> Chapters</div>
+          <div class="chat-hdr-right">
+            <button class="chat-close-btn" id="ts-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+        <div class="panel-body" id="ts-list" style="flex:1;overflow-y:auto;padding:6px"></div>
+      </div>
+      <div id="chat-sidebar">
+        <div class="chat-hdr">
+          <div class="chat-hdr-left"><i class="fa-solid fa-bolt"></i> Live Chat</div>
+          <div class="chat-hdr-right">
+            <span class="chat-watchers"><i class="fa-solid fa-circle" style="color:#f44;font-size:8px"></i> 1.2K
+              watching</span>
+            <button class="chat-close-btn" id="chat-close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="chat-input-wrap">
+          <input class="chat-input" id="chat-input" placeholder="Say something…">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="toast"></div>
+  <script>
+    const vid = document.getElementById('vid');
+    const vc = document.getElementById('vc');
+    const aspectBox = document.getElementById('aspect-box');
+    const stage = document.getElementById('stage');
+    const placeholder = document.getElementById('placeholder');
+    const ripRing = document.getElementById('rip-ring');
+    const playBtn = document.getElementById('play-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const volSl = document.getElementById('vol-slider');
+    const timeTxt = document.getElementById('time-display');
+    const seekTrack = document.getElementById('seek-track');
+    const seekProg = document.getElementById('seek-prog');
+    const seekBuf = document.getElementById('seek-buf');
+    const seekDot = document.getElementById('seek-dot');
+    const seekTip = document.getElementById('seek-tip');
+    const fsBtnEl = document.getElementById('fs-btn');
+    const settingsBtn = document.getElementById('settings-btn');
+    const popSettings = document.getElementById('pop-settings');
+    const chName = document.getElementById('ch-name');
+    const chLabel = document.getElementById('ch-label');
+    const metaTitle = document.getElementById('meta-title');
+    const metaSub = document.getElementById('meta-sub');
+    const topTitle = document.getElementById('top-title');
+    const chatSlot = document.getElementById('chat-slot');
+    const tsSlot = document.getElementById('ts-slot');
+    const spinner = document.getElementById('spinner');
+    const cp = document.getElementById('comments-panel');
+
+    // ════════════════════════════════════════════════════════════════
+    // PORTAL SYSTEM — moves the user's real chat/ts elements into the
+    // player only while fullscreen, and back to their original spot
+    // (marked by a placeholder) otherwise. This is the only part of
+    // the player that knows about chat/ts; everything else is generic.
+    // ════════════════════════════════════════════════════════════════
+    const VideoPlayer = {
+      _portals: [], // { id, el, slot, placeholder }
+
+      /**
+       * @param {Object} opts
+       * @param {string} [opts.chatId]  - id of an existing element to portal into the chat slot on fullscreen
+       * @param {string} [opts.tsId]    - id of an existing element to portal into the chapters slot on fullscreen
+       */
+      init(opts = {}) {
+        const topBar = document.getElementById('top-bar');
+        if (opts.chatId && this._registerPortal(opts.chatId, chatSlot)) {
+          topBar.classList.add('has-chat');
+        }
+        if (opts.tsId && this._registerPortal(opts.tsId, tsSlot)) {
+          topBar.classList.add('has-ts');
+        }
+      },
+
+      _registerPortal(elId, slot) {
+        if (!elId) return false;
+        const el = document.getElementById(elId);
+        if (!el) { console.warn('VideoPlayer: no element found with id', elId); return false; }
+        const placeholder = document.createElement('div');
+        placeholder.className = 'vp-placeholder';
+        placeholder.dataset.vpFor = elId;
+        el.parentNode.insertBefore(placeholder, el);
+        this._portals.push({ id: elId, el, slot, placeholder, homeOpen: false });
+        return true;
+      },
+
+      // called on fullscreenchange
+      _enterFullscreen() {
+        this._portals.forEach(p => {
+          p.slot.appendChild(p.el); // physically move the real node into the player's slot
+        });
+      },
+
+      _exitFullscreen() {
+        this._portals.forEach(p => {
+          p.slot.classList.remove('open');
+          p.placeholder.replaceWith(p.el); // move it right back to where it came from
+          p.placeholder.remove();
+          // recreate a placeholder in case fullscreen is entered again
+          const ph = document.createElement('div');
+          ph.className = 'vp-placeholder';
+          ph.dataset.vpFor = p.id;
+          p.el.parentNode.insertBefore(ph, p.el);
+          p.placeholder = ph;
+        });
+      },
+
+      openPanel(which) {
+        // which: 'chat' | 'ts'
+        const target = which === 'chat' ? chatSlot : tsSlot;
+        const other = which === 'chat' ? tsSlot : chatSlot;
+        const isOpen = target.classList.contains('open');
+        other.classList.remove('open');
+        target.classList.toggle('open', !isOpen);
+        if (!isOpen && which === 'chat') {
+          const msgsEl = chatSlot.querySelector('.chat-msgs');
+          if (msgsEl) msgsEl.scrollTop = msgsEl.scrollHeight;
+        }
+      },
+
+      closeAll() {
+        chatSlot.classList.remove('open');
+        tsSlot.classList.remove('open');
+      }
+    };
+
+    // ── FORMAT TIME ──
+    const fmt = t => {
+      if (!t || isNaN(t)) return '0:00';
+      const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = Math.floor(t % 60);
+      return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+    };
+
+    // ── TOAST ──
+    let toastT;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    // ── CHAPTERS ──
+    const chapters = [{ t: 0, label: 'Intro' }, { t: 30, label: 'Scene 1' }, { t: 90, label: 'Scene 2' }, { t: 180, label: 'Scene 3' }, { t: 300, label: 'Climax' }, { t: 420, label: 'Outro' }];
+    const tsList = document.getElementById('ts-list'), tsItems = [];
+    chapters.forEach((c, i) => {
+      const el = document.createElement('div'); el.className = 'ts-item';
+      el.innerHTML = `<span class="ts-time">${fmt(c.t)}</span><span>${c.label}</span>`;
+      el.addEventListener('click', () => { vid.currentTime = c.t; vid.play(); tsSlot.classList.remove('open'); });
+      tsList.appendChild(el); tsItems.push(el);
+    });
+    function getCurrentChapterIdx() { let idx = 0; for (let i = 0; i < chapters.length; i++) { if (vid.currentTime >= chapters[i].t) idx = i; else break; } return idx; }
+    function buildChapterMarkers() {
+      document.querySelectorAll('.ch-marker').forEach(m => m.remove());
+      if (!vid.duration) return;
+      chapters.forEach((c, i) => { if (i === 0) return; const m = document.createElement('div'); m.className = 'ch-marker'; m.style.left = (c.t / vid.duration * 100) + '%'; seekTrack.appendChild(m); });
+    }
+
+    // ── CHAT ──
+    const chatData = [
+      { u: 'Dev_AJ', m: 'This player is 🔥' }, { u: 'KotlinFan', m: 'Looks exactly like YouTube!' },
+      { u: 'AndroidDev', m: 'Which framework is this?' }, { u: 'JetpackPro', m: 'Love the floating controls' },
+      { u: 'SK99', m: 'PiP works great 🎉' }, { u: 'MPCode', m: 'Pure HTML/CSS/JS!' },
+      { u: 'NeatRoot', m: 'Great tutorial content!' }, { u: 'CodeBro', m: 'The red seekbar 💯' },
+      { u: 'WebWiz', m: 'Chat sidebar genius 🧠' }, { u: 'PixelPro', m: 'Glass panels are chef\'s kiss' },
+    ];
+    const chatMsgsEl = document.getElementById('chat-msgs');
+    function addChatMsg(u, m) { const el = document.createElement('div'); el.className = 'chat-msg'; el.innerHTML = `<b>${u}</b>${m}`; chatMsgsEl.appendChild(el); chatMsgsEl.scrollTop = chatMsgsEl.scrollHeight; }
+    chatData.forEach(c => addChatMsg(c.u, c.m));
+    const liveMsgs = [{ u: 'Viewer42', m: 'Watching from Kolkata! 🙌' }, { u: 'TechFan', m: 'Next level!' }, { u: 'CSSLord', m: 'Gradient overlays 🤌' }, { u: 'HtmlHero', m: 'No library needed!' }];
+    let liveIdx = 0;
+    setInterval(() => { if (chatSlot.classList.contains('open')) { const c = liveMsgs[liveIdx % liveMsgs.length]; addChatMsg(c.u, c.m); liveIdx++; } }, 4000);
+    document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.value.trim()) { addChatMsg('You', e.target.value.trim()); e.target.value = ''; } });
+
+    // ── COMMENTS ──
+    const commentsData = [
+      { init: 'AJ', color: '#3ea6ff,#1a73e8', name: 'Alex J.', text: 'Exactly like YouTube! Great work.' },
+      { init: 'SK', color: '#e91e63,#9c27b0', name: 'Sarah K.', text: 'The red seekbar and floating controls are 🔥' },
+      { init: 'MP', color: '#ff9800,#f44336', name: 'Mike P.', text: 'PiP and fullscreen both work perfectly.' },
+      { init: 'NN', color: '#4caf50,#00bcd4', name: 'Neel N.', text: 'Chat sidebar not overlapping the video is genius.' },
+    ];
+    commentsData.forEach(c => {
+      const el = document.createElement('div'); el.className = 'cmt';
+      el.innerHTML = `<div class="cavatar" style="background:linear-gradient(135deg,${c.color})">${c.init}</div><div class="cbody"><p>${c.name}</p><p>${c.text}</p></div>`;
+      cp.appendChild(el);
+    });
+
+    // ── LOCAL FILE ──
+    document.getElementById('file-btn').addEventListener('click', () => document.getElementById('file-input').click());
+    document.getElementById('file-input').addEventListener('change', e => {
+      const f = e.target.files[0]; if (!f) return;
+      const url = URL.createObjectURL(f);
+      loadURL(url, f.name, 'Local file');
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active-chip'));
+    });
+
+    // ── LOAD VIDEO ──
+    let currentObjUrl = null;
+    function loadURL(url, title, sub) {
+      if (!url) return;
+      if (currentObjUrl && currentObjUrl !== url) { URL.revokeObjectURL(currentObjUrl); currentObjUrl = null; }
+      if (url.startsWith('blob:')) currentObjUrl = url;
+      placeholder.style.display = 'none'; spinner.classList.add('show');
+      vc.classList.remove('no-src');
+      vid.src = url; vid.load(); vid.play().catch(() => { });
+      metaTitle.textContent = title || url.split('/').pop().replace(/\.\w+$/, '');
+      metaSub.textContent = sub || 'Custom video';
+      topTitle.textContent = title || 'Now Playing';
+      document.getElementById('url-input').value = url.startsWith('blob:') ? 'Local file: ' + title : url;
+    }
+    vid.addEventListener('canplay', () => spinner.classList.remove('show'));
+    vid.addEventListener('waiting', () => spinner.classList.add('show'));
+    vid.addEventListener('playing', () => spinner.classList.remove('show'));
+    vid.addEventListener('error', () => {
+      spinner.classList.remove('show');
+      vc.classList.add('no-src');
+      placeholder.style.display = 'flex';
+      toast('⚠️ Could not load video — try another URL');
+    });
+
+    document.getElementById('url-load').addEventListener('click', () => { const v = document.getElementById('url-input').value.trim(); if (v && !v.startsWith('Local')) { loadURL(v); document.querySelectorAll('.chip').forEach(c => c.classList.remove('active-chip')); } });
+    document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') { const v = e.target.value.trim(); if (v && !v.startsWith('Local')) loadURL(v); } });
+    document.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active-chip'));
+        btn.classList.add('active-chip');
+        loadURL(btn.dataset.url, btn.dataset.title, btn.dataset.sub);
+      });
+    });
+
+    // ── UI SHOW/HIDE ──
+    let uiTimer;
+    function showUI() { vc.classList.add('show-ui', 'show-cursor'); clearTimeout(uiTimer); uiTimer = setTimeout(() => { if (!vid.paused) vc.classList.remove('show-ui', 'show-cursor'); }, 3000); }
+    vc.addEventListener('mousemove', showUI);
+    vc.addEventListener('mouseleave', () => { if (!vid.paused) vc.classList.remove('show-ui', 'show-cursor'); });
+    vc.addEventListener('click', e => {
+      if (vc.classList.contains('no-src')) return;
+      const ignore = ['.cb', '.yt-pill-btn', '.yt-action-btn', '.yt-icon-btn', '.panel-close', '.chat-close-btn', '.ts-item'];
+      if (ignore.some(s => e.target.closest(s))) return;
+      if (e.target === vc || e.target === vid || e.target === aspectBox || e.target.id === 'grad-top' || e.target.id === 'grad-bot')
+        vid.paused ? vid.play() : vid.pause();
+    });
+
+    // ── RIPPLE ──
+    let ripTimer;
+    function ripple(icon) { ripRing.querySelector('i').className = icon; ripRing.classList.add('show'); clearTimeout(ripTimer); ripTimer = setTimeout(() => ripRing.classList.remove('show'), 500); }
+    vid.addEventListener('play', () => { setPlayIcon(false); ripple('fa-solid fa-pause'); showUI(); });
+    vid.addEventListener('pause', () => { setPlayIcon(true); ripple('fa-solid fa-play'); vc.classList.add('show-ui', 'show-cursor'); });
+    function setPlayIcon(p) { playBtn.querySelector('i').className = p ? 'fa-solid fa-play' : 'fa-solid fa-pause'; }
+    playBtn.addEventListener('click', () => vid.paused ? vid.play() : vid.pause());
+
+    // ── SEEK ──
+    vid.addEventListener('timeupdate', () => {
+      const p = vid.duration ? vid.currentTime / vid.duration * 100 : 0;
+      seekProg.style.width = p + '%'; seekDot.style.left = p + '%';
+      timeTxt.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration || 0)}`;
+      const idx = getCurrentChapterIdx();
+      chName.textContent = chapters[idx].label; chLabel.textContent = chapters[idx].label;
+      tsItems.forEach((el, i) => el.classList.toggle('active-ts', i === idx));
+    });
+    vid.addEventListener('loadedmetadata', () => { timeTxt.textContent = `0:00 / ${fmt(vid.duration)}`; buildChapterMarkers(); });
+    vid.addEventListener('progress', () => { if (vid.buffered.length) seekBuf.style.width = (vid.buffered.end(vid.buffered.length - 1) / (vid.duration || 1) * 100) + '%'; });
+
+    let isSeeking = false;
+    function doSeek(e, el) { const r = el.getBoundingClientRect(); const x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); vid.currentTime = x * (vid.duration || 0); }
+    seekTrack.addEventListener('mousedown', e => { isSeeking = true; doSeek(e, seekTrack); });
+    document.addEventListener('mousemove', e => { if (isSeeking) doSeek(e, seekTrack); });
+    document.addEventListener('mouseup', () => { isSeeking = false; });
+    seekTrack.addEventListener('mousemove', e => { const r = seekTrack.getBoundingClientRect(); const x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); seekTip.style.left = (x * 100) + '%'; seekTip.style.opacity = '1'; seekTip.textContent = fmt(x * (vid.duration || 0)); });
+    seekTrack.addEventListener('mouseleave', () => { seekTip.style.opacity = '0'; });
+
+    // ── VOLUME ──
+    function updateVolIcon() { const i = muteBtn.querySelector('i'); if (vid.muted || vid.volume === 0) i.className = 'fa-solid fa-volume-xmark'; else if (vid.volume < 0.5) i.className = 'fa-solid fa-volume-low'; else i.className = 'fa-solid fa-volume-high'; }
+    muteBtn.addEventListener('click', () => { vid.muted = !vid.muted; updateVolIcon(); });
+    volSl.addEventListener('input', () => { vid.volume = volSl.value / 100; if (vid.muted && volSl.value > 0) vid.muted = false; updateVolIcon(); });
+
+    // ── SKIP ──
+    document.getElementById('prev-btn').addEventListener('click', () => { vid.currentTime = Math.max(0, vid.currentTime - 10); toast('⏪ −10s'); });
+    document.getElementById('next-btn').addEventListener('click', () => { vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10); toast('⏩ +10s'); });
+
+    // ── SETTINGS ──
+    settingsBtn.addEventListener('click', e => { e.stopPropagation(); popSettings.style.display = popSettings.style.display === 'block' ? 'none' : 'block'; });
+    document.addEventListener('click', () => { popSettings.style.display = 'none'; });
+    popSettings.querySelectorAll('[data-s]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation(); vid.playbackRate = parseFloat(el.dataset.s);
+        popSettings.querySelectorAll('[data-s]').forEach(x => { x.classList.remove('sel'); const ic = x.querySelector('.fa-check'); if (ic) ic.remove(); });
+        el.classList.add('sel'); const ic = document.createElement('i'); ic.className = 'fa-solid fa-check'; ic.style.color = 'var(--blue)'; el.appendChild(ic); toast(`Speed: ${el.dataset.s}×`);
+      });
+    });
+    popSettings.querySelectorAll('[data-q]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        popSettings.querySelectorAll('[data-q]').forEach(x => { x.classList.remove('sel'); const ic = x.querySelector('.fa-check'); if (ic) ic.remove(); });
+        el.classList.add('sel'); const ic = document.createElement('i'); ic.className = 'fa-solid fa-check'; ic.style.color = 'var(--blue)'; el.appendChild(ic); toast(`Quality: ${el.dataset.q}`);
+      });
+    });
+
+    // ── CAPTIONS ──
+    document.getElementById('cc-btn').addEventListener('click', () => { const b = document.getElementById('cc-btn'); b.classList.toggle('active'); toast(b.classList.contains('active') ? 'Captions ON' : 'Captions OFF'); });
+
+    // ── AUTOPLAY ──
+    document.getElementById('autoplay-btn').addEventListener('click', () => { const b = document.getElementById('autoplay-btn'); b.classList.toggle('active'); toast(b.classList.contains('active') ? 'Autoplay ON' : 'Autoplay OFF'); });
+
+    // ── CLIP ──
+    document.getElementById('clip-btn').addEventListener('click', () => toast('✂️ Clip feature (demo)'));
+
+    // ── PIP ──
+    async function togglePiP() { try { if (document.pictureInPictureElement) await document.exitPictureInPicture(); else await vid.requestPictureInPicture(); } catch (e) { toast('PiP not supported in this browser'); } }
+    document.getElementById('pip-btn').addEventListener('click', togglePiP);
+
+    // ── CHAT / CHAPTERS PANELS ──
+    // In fullscreen these open the portal slot; outside fullscreen they
+    // drive the test-harness switcher (which widget the host page shows).
+    document.getElementById('chat-btn').addEventListener('click', () => {
+      if (document.fullscreenElement) VideoPlayer.openPanel('chat');
+      else showExternalWidget('chat');
+    });
+    document.getElementById('ts-btn').addEventListener('click', () => {
+      if (document.fullscreenElement) VideoPlayer.openPanel('ts');
+      else showExternalWidget('ts');
+    });
+    // close buttons live on the user's own elements; behavior depends on context —
+    // in fullscreen they close the portal slot, otherwise they hide via the test-harness switcher
+    document.getElementById('chat-close').addEventListener('click', () => {
+      if (document.fullscreenElement) chatSlot.classList.remove('open');
+      else showExternalWidget('ts');
+    });
+    document.getElementById('ts-close').addEventListener('click', () => {
+      if (document.fullscreenElement) tsSlot.classList.remove('open');
+      else showExternalWidget('chat');
+    });
+
+    // ── TEST HARNESS ONLY: outside fullscreen, only one of the two
+    // external widgets (chapters / live chat) is visible at a time.
+    // This has nothing to do with the player — it's just how this demo
+    // page chooses to lay out its own chat/chapters widgets. ──
+    const extWidgets = document.getElementById('external-widgets');
+    function showExternalWidget(which) {
+      extWidgets.classList.toggle('widgets-hidden-ts', which === 'chat');
+      extWidgets.classList.toggle('widgets-hidden-chat', which === 'ts');
+    }
+
+    // ── LIKE / DISLIKE ──
+    let liked = false, disliked = false, lc = 24000;
+    const likeBtn = document.getElementById('like-btn'), dislikeBtn = document.getElementById('dislike-btn'), likeCntEl = document.getElementById('like-count');
+    function fmtNum(n) { return n >= 1000 ? (n / 1000).toFixed(1) + 'K' : String(n); }
+    function updateLike() { likeBtn.classList.toggle('liked', liked); dislikeBtn.classList.toggle('disliked', disliked); likeCntEl.textContent = fmtNum(lc); likeBtn.querySelector('i').className = liked ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'; dislikeBtn.querySelector('i').className = disliked ? 'fa-solid fa-thumbs-down' : 'fa-regular fa-thumbs-down'; }
+    likeBtn.addEventListener('click', () => { liked = !liked; lc += liked ? 1 : -1; if (liked) disliked = false; updateLike(); });
+    dislikeBtn.addEventListener('click', () => { disliked = !disliked; if (disliked && liked) { liked = false; lc--; } updateLike(); });
+
+    // ── SHARE ──
+    function doShare() { navigator.clipboard?.writeText(vid.src || location.href).then(() => toast('🔗 Link copied!')).catch(() => toast('Copy failed')); }
+    document.getElementById('share-btn').addEventListener('click', doShare);
+
+    // ── SAVE ──
+    let saved = false;
+    document.getElementById('save-btn').addEventListener('click', () => { saved = !saved; const b = document.getElementById('save-btn'); b.classList.toggle('saved', saved); b.innerHTML = saved ? '<i class="fa-solid fa-bookmark"></i> <span>Saved</span>' : '<i class="fa-regular fa-bookmark"></i> <span>Save</span>'; toast(saved ? '🔖 Saved' : 'Removed from saved'); });
+
+    // ── COMMENTS ──
+    document.getElementById('cmt-toggle').addEventListener('click', () => { cp.classList.toggle('open'); if (cp.classList.contains('open')) cp.scrollIntoView({ behavior: 'smooth' }); });
+
+    // ── FULLSCREEN ──
+    fsBtnEl.addEventListener('click', () => { if (!document.fullscreenElement) stage.requestFullscreen?.(); else document.exitFullscreen?.(); });
+    document.getElementById('real-fs-btn').addEventListener('click', () => { if (!document.fullscreenElement) stage.requestFullscreen?.(); else document.exitFullscreen?.(); });
+    document.addEventListener('fullscreenchange', () => {
+      const fs = !!document.fullscreenElement;
+      fsBtnEl.querySelector('i').className = fs ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+      if (fs) {
+        aspectBox.style.aspectRatio = 'unset'; aspectBox.style.height = '100%'; vc.style.height = '100%'; stage.style.height = '100vh';
+        VideoPlayer._enterFullscreen();
+      }
+      else {
+        aspectBox.style.aspectRatio = '16/9'; aspectBox.style.height = ''; vc.style.height = ''; stage.style.height = '';
+        VideoPlayer._exitFullscreen();
+      }
+      showUI();
+    });
+
+    // ── THEATER MODE ──
+    let theater = false;
+    document.getElementById('theater-btn').addEventListener('click', () => {
+      theater = !theater;
+      document.body.classList.toggle('theater-mode', theater);
+      if (theater) {
+        document.getElementById('theater-btn').innerHTML = '<i class="fa-solid fa-compress"></i> Exit Theater';
+      } else {
+        document.getElementById('theater-btn').innerHTML = '<i class="fa-solid fa-expand"></i> Theater Mode';
+      }
+      showUI();
+    });
+
+    // ── KEYBOARD ──
+    document.addEventListener('keydown', e => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (vc.classList.contains('no-src')) return;
+      switch (e.key) {
+        case 'k': case ' ': e.preventDefault(); vid.paused ? vid.play() : vid.pause(); break;
+        case 'j': vid.currentTime = Math.max(0, vid.currentTime - 10); toast('⏪ −10s'); break;
+        case 'l': vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10); toast('⏩ +10s'); break;
+        case 'm': vid.muted = !vid.muted; updateVolIcon(); toast(vid.muted ? '🔇 Muted' : '🔊 Unmuted'); break;
+        case 'f': fsBtnEl.click(); break;
+        case 'c': document.getElementById('cc-btn').click(); break;
+        case 't': document.getElementById('theater-btn').click(); break;
+      }
+    });
+    // ── INIT PORTAL SYSTEM ──
+    // Tell the player which page elements are the chat & chapters widgets.
+    // It will relocate these exact nodes into itself on fullscreen, and
+    // put them back where they came from when fullscreen exits.
+    VideoPlayer.init({ chatId: 'chat-sidebar', tsId: 'ts-sidebar' });
+  </script>
+</body>
+
+</html>
